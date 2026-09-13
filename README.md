@@ -40,42 +40,33 @@ This repository provides clear step-by-step instructions, runnable Python script
 
 ---
 
-## Step 1: Prepare the Environment
+## Step 1: Prepare the Environment & Install with `uv`
 
-We strongly recommend **Python 3.10, 3.11, or 3.12**.
+This project uses [`uv`](https://github.com/astral-sh/uv), the blazing-fast Python package and project manager.
 
-### Option A: Using `uv` (Recommended — fast & deterministic)
-If you don't have `uv`, install it via `curl -LsSf https://astral.sh/uv/install.sh` or `brew install uv`.
+If you don't have `uv` installed:
+```bash
+# macOS / Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# or with Homebrew:
+brew install uv
+```
 
+To initialize the environment and install all dependencies (including testing and visualization extras), simply run:
 ```bash
 cd /Users/neilson/projects/quantum_inspire
-uv venv .venv --python 3.12
-source .venv/bin/activate
+uv sync --all-extras
 ```
 
-### Option B: Using standard `venv`
-```bash
-cd /Users/neilson/projects/quantum_inspire
-python3 -m venv .venv
-source .venv/bin/activate
-```
+`uv sync` automatically:
+1. Creates a local `.venv` environment using Python 3.12 (or your preferred installed Python).
+2. Resolves and freezes exact compatible versions in `uv.lock`.
+3. Installs `qiskit`, `qiskit-quantuminspire`, `quantuminspire`, and the local `qi_starter` package in editable mode.
 
----
+> [!TIP]
+> With `uv`, you don't even need to remember to run `source .venv/bin/activate`! You can execute any script directly using `uv run python examples/...`.
 
-## Step 2: Install Dependencies
-
-> [!IMPORTANT]
-> **Compatibility Note**: `qiskit-quantuminspire 0.18.2` requires `qiskit>=2.0.0,<2.4.0` and `quantuminspire>=4.0.0`. Installing unmatched versions of Qiskit 1.x or Qiskit 2.4+ will break provider imports.
-
-Install using `uv`:
-```bash
-uv pip install -e ".[dev,visuals]"
-```
-
-Or using standard `pip`:
-```bash
-pip install -r requirements.txt
-```
+*(Optional: If you ever need to use classic `pip` instead, run `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`)*
 
 ---
 
@@ -108,7 +99,7 @@ Quantum Inspire 4.x uses browser-based OAuth authentication.
 Verify that Python can read your credentials and list visible backends:
 
 ```bash
-python examples/01_check_connection.py
+uv run python examples/01_check_connection.py
 ```
 
 Expected output:
@@ -136,7 +127,7 @@ Available Quantum Inspire Backends:
 
 You can also list backends directly from the command line anytime with:
 ```bash
-qi backends list
+uv run qi backends list
 ```
 
 ---
@@ -146,7 +137,7 @@ qi backends list
 Run a 2-qubit entangled Bell state ($|\Phi^+\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}$) on the free `QX emulator`:
 
 ```bash
-python examples/02_run_bell_state.py
+uv run python examples/02_run_bell_state.py
 ```
 
 Expected output:
@@ -190,7 +181,7 @@ For $n=2$ qubits (4 basis states) and a single marked item, 1 iteration produces
 
 Run Grover search targeting state $|10\rangle$:
 ```bash
-python examples/03_run_grover_search.py --marked 10 --shots 1024
+uv run python examples/03_run_grover_search.py --marked 10 --shots 1024
 ```
 
 Expected output:
@@ -226,7 +217,7 @@ job = backend.run([circuit_a, circuit_b, circuit_c], shots=1024)
 
 Run the batch demonstration:
 ```bash
-python examples/04_batch_submission.py
+uv run python examples/04_batch_submission.py
 ```
 
 ### Batch Chunking
@@ -256,7 +247,11 @@ During the development of Quanifi's Grover hardware evaluation on Quantum Inspir
   ```
 - Run the safe hardware script to inspect the transpiled output:
   ```bash
-  python examples/05_hardware_tuna17_safe.py
+  # Preflight inspection (zero quota spent):
+  uv run python examples/05_hardware_tuna17_safe.py
+
+  # Real hardware execution:
+  uv run python examples/05_hardware_tuna17_safe.py --armed
   ```
 
 ### 2. Asynchronous Job Persistence via QPY Serialisation
@@ -275,10 +270,10 @@ During the development of Quanifi's Grover hardware evaluation on Quantum Inspir
 - Run the demonstration:
   ```bash
   # Submit and exit immediately without waiting:
-  python examples/06_async_serialize_poll.py --submit-only --handle runs/task.qpy
+  uv run python examples/06_async_serialize_poll.py --submit-only --handle runs/task.qpy
 
   # Check in later and retrieve results:
-  python examples/06_async_serialize_poll.py --poll-only --handle runs/task.qpy
+  uv run python examples/06_async_serialize_poll.py --poll-only --handle runs/task.qpy
   ```
 
 ### 3. Defensive Per-Index Result Extraction

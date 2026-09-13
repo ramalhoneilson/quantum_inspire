@@ -81,9 +81,9 @@ def get_provider():
     except ImportError as exc:
         raise RuntimeError(
             "qiskit-quantuminspire is not installed in the active environment.\n"
-            "Install it via:\n"
-            "    pip install qiskit-quantuminspire quantuminspire\n"
-            "or with uv:\n"
+            "Install it with uv:\n"
+            "    uv sync --all-extras\n"
+            "or:\n"
             "    uv add qiskit-quantuminspire quantuminspire"
         ) from exc
 
