@@ -15,11 +15,10 @@ This repository provides step-by-step instructions, runnable example scripts, an
 6. [Step 5: Run a Complete Algorithm (Grover Search)](#step-5-run-a-complete-algorithm-grover-search)
 7. [Step 6: Batch Submissions & Chunking](#step-6-batch-submissions--chunking)
 8. [Step 7: Practical Lessons for Quantum Inspire](#step-7-practical-lessons-for-quantum-inspire)
-   - [Excluding `rx` on Tuna-17](#1-excluding-rx-on-tuna-17)
-   - [Asynchronous Job Persistence via QPY Serialization](#2-asynchronous-job-persistence-via-qpy-serialization)
-   - [Per-Index Result Extraction](#3-per-index-result-extraction)
-   - [Bit Endianness Normalization (q0-right vs q0-left)](#4-bit-endianness-normalization-q0-right-vs-q0-left)
-   - [Hardware Quota Safety Guard (`--armed`)](#5-hardware-quota-safety-guard---armed)
+   - [Asynchronous Job Persistence via QPY Serialization](#1-asynchronous-job-persistence-via-qpy-serialization)
+   - [Per-Index Result Extraction](#2-per-index-result-extraction)
+   - [Bit Endianness Normalization (q0-right vs q0-left)](#3-bit-endianness-normalization-q0-right-vs-q0-left)
+   - [Hardware Quota Safety Guard (`--armed`)](#4-hardware-quota-safety-guard---armed)
 9. [Step 8: Presenting & Analyzing Results](#step-8-presenting--analyzing-results)
 10. [Project Structure](#project-structure)
 11. [Running Automated Tests](#running-automated-tests)
@@ -247,26 +246,7 @@ If you have 20 circuits, use `chunk_ranges(len(circuits), limit)` from `qi_start
 
 Running experiments on Quantum Inspire turned up several platform behaviors that are worth knowing about up front.
 
-### 1. Excluding `rx` on Tuna-17
-- **Observation**: `Tuna-17` advertises `rx` in its gateset. On Tuna-17 we observed circuits transpiled with `rx` behaving as if the rotation angle were negated (the 2-qubit Grover circuit returned the bitwise complement of the marked state). We have not confirmed the root cause.
-- **Precaution**: `qi_starter` excludes `rx` from the transpiler basis. `ry` and `rz` together span all single-qubit rotations, so nothing is lost. Tuna-17 implements `CZ` for 2-qubit operations.
-- **Implementation**: `qi_starter.backend.native_basis_gates(backend)` filters out `rx`:
-  ```python
-  _QI_UNRELIABLE_GATES = {"rx"}
-  basis = sorted(mapped_device_gates - _QI_UNRELIABLE_GATES)
-  # Qiskit transpile with basis_gates=basis synthesizes with ry and rz
-  ```
-  The filter is applied to all backends, not only Tuna-17. On emulators this costs nothing for the same reason.
-- Run the hardware script to inspect the transpiled output:
-  ```bash
-  # Preflight inspection (zero quota spent):
-  uv run python examples/05_hardware_tuna17_safe.py
-
-  # Real hardware execution:
-  uv run python examples/05_hardware_tuna17_safe.py --armed
-  ```
-
-### 2. Asynchronous Job Persistence via QPY Serialization
+### 1. Asynchronous Job Persistence via QPY Serialization
 - **The Problem**: In `qiskit_quantuminspire`, `job.job_id()` returns `""`. The provider assigns `job.batch_job_id`, but the internal per-circuit job IDs needed to call `job.result()` live **only on the in-memory Python object**. If your script terminates or a pipeline worker restarts, the job cannot be polled through the public API with just the batch ID.
 - **The Solution**: Serialize the `QIJob` handle immediately after submission:
   ```python
@@ -288,7 +268,7 @@ Running experiments on Quantum Inspire turned up several platform behaviors that
   uv run python examples/06_async_serialize_poll.py --poll-only --handle runs/task.qpy
   ```
 
-### 3. Per-Index Result Extraction
+### 2. Per-Index Result Extraction
 - **The Problem**: Calling `result.get_counts()` without arguments raises an immediate exception if *even one* experiment in a multi-circuit batch failed or timed out on the provider side. This would crash your program and discard the results of the circuits that succeeded.
 - **The Solution**: Extract counts per index instead:
   ```python
@@ -300,14 +280,22 @@ Running experiments on Quantum Inspire turned up several platform behaviors that
           counts_list.append({})  # preserve successful sibling circuits
   ```
 
-### 4. Bit Endianness Normalization (q0-right vs q0-left)
+### 3. Bit Endianness Normalization (q0-right vs q0-left)
 - Qiskit and Quantum Inspire return measurement bitstrings in little-endian order (qubit 0 is the rightmost character).
 - In the textbook convention, qubit 0 is the leftmost character.
 - Use `canonicalize_counts(counts, reverse_bits=True)` to convert between representations.
 
-### 5. Hardware Quota Safety Guard (`--armed`)
+### 4. Hardware Quota Safety Guard (`--armed`)
 - Physical QPUs (`Tuna-5`, `Tuna-9`, `Tuna-17`) consume limited quota or credits.
 - All example scripts and runner functions default to free emulators. Submitting to real hardware requires the explicit `armed=True` parameter or `--armed` CLI flag.
+- Run the hardware script to inspect native basis gates and the transpiled circuit:
+  ```bash
+  # Preflight inspection (zero quota spent):
+  uv run python examples/05_hardware_tuna17_safe.py
+
+  # Real hardware execution:
+  uv run python examples/05_hardware_tuna17_safe.py --armed
+  ```
 
 ---
 
@@ -357,7 +345,7 @@ quantum_inspire/
 ├── qi_starter/                 # Core Python package
 │   ├── __init__.py             # Public API exports
 │   ├── auth.py                 # Offline auth check & QIProvider loader
-│   ├── backend.py              # Backend discovery & basis gate selection (excludes rx)
+│   ├── backend.py              # Backend discovery & native basis gates
 │   ├── circuits.py             # Bell, GHZ, and Grover circuit generators
 │   ├── runner.py               # Preflight checks, QPY serialization & polling
 │   └── results.py              # Endianness, Wilson intervals & ASCII histogram
@@ -367,7 +355,7 @@ quantum_inspire/
 │   ├── 02_run_bell_state.py    # Run Bell state on QX emulator
 │   ├── 03_run_grover_search.py # Run Grover algorithm with Wilson interval
 │   ├── 04_batch_submission.py  # Multi-circuit batch submission & chunking
-│   ├── 05_hardware_tuna17_safe.py # Hardware run with rx excluded & --armed
+│   ├── 05_hardware_tuna17_safe.py # Safe hardware run with --armed guard
 │   └── 06_async_serialize_poll.py # Detached run with QPY handle save/restore
 │
 └── tests/                      # Automated unit test suite

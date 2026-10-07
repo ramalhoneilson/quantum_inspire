@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 SIMULATOR_HINTS = ("emulator", "simulator", "qx")
@@ -29,14 +29,6 @@ _QI_GATESET_TO_QISKIT: Dict[str, str] = {
     "reset": "reset",
 }
 
-# Precaution for Tuna-17: it advertises 'rx', but we observed circuits transpiled
-# with 'rx' behaving as if the rotation angle were negated. The root cause has not
-# been confirmed. 'ry' and 'rz' together span all single-qubit rotations, so
-# excluding 'rx' from the transpiler basis loses nothing; Qiskit synthesizes with
-# ry/rz instead. The exclusion is applied to every backend (it costs nothing on
-# emulators).
-_QI_UNRELIABLE_GATES: Set[str] = {"rx"}
-
 
 def is_hardware(name_or_backend: Any) -> bool:
     """Check whether a backend is a real quantum processing unit (QPU) or an emulator.
@@ -57,15 +49,12 @@ def is_hardware(name_or_backend: Any) -> bool:
 
 
 def native_basis_gates(backend: Any) -> Optional[List[str]]:
-    """Determine the true physical native basis gates for a Quantum Inspire backend.
+    """Determine the native basis gates for a Quantum Inspire backend.
 
     By default, `qiskit_quantuminspire` advertises a static target basis that
     includes gates not physically implemented by the chip (e.g. CX or SWAP on Tuna-17,
-    which natively implements CZ). Furthermore, `rx` is excluded as a precaution
-    (we observed it behaving as if the angle were negated on Tuna-17; the root
-    cause is unconfirmed). The exclusion applies to all backends, including
-    emulators, where it costs nothing because `ry` and `rz` span all single-qubit
-    rotations.
+    which natively implements CZ). This function instead maps the device's own
+    gateset names (e.g. `cnot`, `sdag`) to the corresponding Qiskit gate names.
 
     Args:
         backend: A Qiskit Backend object from QIProvider.
@@ -91,8 +80,7 @@ def native_basis_gates(backend: Any) -> Optional[List[str]]:
         for name in gateset
         if name.lower() in _QI_GATESET_TO_QISKIT
     }
-    # Exclude gates we treat as unreliable (currently only 'rx')
-    return sorted(mapped - _QI_UNRELIABLE_GATES)
+    return sorted(mapped)
 
 
 def chunk_ranges(count: int, limit: int) -> List[Tuple[int, int]]:

@@ -26,19 +26,19 @@ def test_is_hardware():
     assert is_hardware("Spin-2")
 
 
-def test_native_basis_gates_filters_rx():
-    # Mock backend type with Tuna-17 gateset
+def test_native_basis_gates_maps_gateset():
     class MockBackendType:
-        gateset = ["x", "y", "z", "h", "rx", "ry", "rz", "cz", "measure", "reset"]
+        gateset = ["x", "h", "rx", "ry", "rz", "cz", "cnot", "sdag", "foo", "measure"]
 
     class MockBackend:
         def get_backend_type(self):
             return MockBackendType()
 
     gates = native_basis_gates(MockBackend())
-    assert gates is not None
-    # 'rx' must be excluded from the basis
-    assert "rx" not in gates
-    assert "cz" in gates
-    assert "ry" in gates
-    assert "rz" in gates
+    assert gates == sorted(gates)
+    for name in ("rx", "ry", "rz", "cz", "cx", "sdg", "h", "x", "measure"):
+        assert name in gates
+    # Unknown names are ignored; QI names are translated
+    assert "foo" not in gates
+    assert "cnot" not in gates
+    assert "sdag" not in gates

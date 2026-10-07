@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Example 5: Safe execution on real quantum hardware (Tuna-17) with `rx` excluded from the basis.
+"""Example 5: Safe execution on real quantum hardware (Tuna-17).
 
 Demonstrates:
   - Safety guards: requires `--armed` to spend real QPU quota
-  - Hardware basis gate inspection (`rx` is excluded as a precaution on Tuna-17)
-  - Transpiling into real physical gates ({cz, ry, rz, h, x, y, z})
+  - Native basis gate inspection for the target backend
+  - Transpiling into the backend's native gates (e.g. CZ rather than CX)
   - Preflight analysis without spending compute time
 
 Usage:
@@ -45,14 +45,9 @@ def main():
     console.print(f"Physical Qubits: {info['num_qubits']}")
     console.print(f"Device Status: {info['status']}")
 
-    # 1. Native Basis Gates & Why 'rx' is excluded
+    # 1. Native Basis Gates
     basis = native_basis_gates(backend)
     console.print(f"\n[bold]Resolved Physical Basis Gates:[/bold] [green]{basis}[/green]")
-    console.print(
-        "[dim]Note: 'rx' is deliberately omitted. On Tuna-17 we observed circuits using rx "
-        "behaving as if the rotation angle were negated (root cause unconfirmed), so as a "
-        "precaution the transpiler synthesizes with ry and rz instead.[/dim]\n"
-    )
 
     # 2. Transpilation Preflight
     qc = create_grover_circuit(marked_state="10")

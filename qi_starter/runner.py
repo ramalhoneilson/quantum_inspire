@@ -18,12 +18,9 @@ def transpile_for_backend(
     optimization_level: int = 3,
     seed_transpiler: int = 42,
 ) -> Union[QuantumCircuit, List[QuantumCircuit]]:
-    """Transpile circuit(s) ensuring physical hardware gate constraints are respected.
+    """Transpile circuit(s) to the backend's native gateset.
 
-    Uses `native_basis_gates` to avoid unsupported gates and `rx` (which we
-    observed behaving as if the angle were negated on Tuna-17; root cause
-    unconfirmed). The exclusion is applied to all backends and costs nothing on
-    emulators, since `ry` and `rz` span all single-qubit rotations.
+    Uses `native_basis_gates` to restrict synthesis to gates the device supports.
 
     Args:
         circuits: A single QuantumCircuit or list of circuits.
