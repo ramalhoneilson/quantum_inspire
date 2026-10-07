@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Example 5: Safe execution on real quantum hardware (Tuna-17) with the Quanifi gate fix.
+"""Example 5: Safe execution on real quantum hardware (Tuna-17) with `rx` excluded from the basis.
 
 Demonstrates:
   - Safety guards: requires `--armed` to spend real QPU quota
-  - Hardware basis gate inspection (excluding Tuna-17's faulty `rx` gate)
+  - Hardware basis gate inspection (`rx` is excluded as a precaution on Tuna-17)
   - Transpiling into real physical gates ({cz, ry, rz, h, x, y, z})
   - Preflight analysis without spending compute time
 
@@ -18,7 +18,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 from rich.console import Console
 
 from qi_starter.auth import get_provider
@@ -46,13 +45,13 @@ def main():
     console.print(f"Physical Qubits: {info['num_qubits']}")
     console.print(f"Device Status: {info['status']}")
 
-    # 1. Native Basis Gates & The Tuna-17 'rx' Defect Explanation
+    # 1. Native Basis Gates & Why 'rx' is excluded
     basis = native_basis_gates(backend)
     console.print(f"\n[bold]Resolved Physical Basis Gates:[/bold] [green]{basis}[/green]")
     console.print(
-        "[dim]Note: 'rx' is deliberately omitted because Tuna-17 hardware inverts the rotation "
-        "angle on rx. Excluding rx forces the transpiler to synthesize using ry and rz, "
-        "which execute correctly on the chip.[/dim]\n"
+        "[dim]Note: 'rx' is deliberately omitted. On Tuna-17 we observed circuits using rx "
+        "behaving as if the rotation angle were negated (root cause unconfirmed), so as a "
+        "precaution the transpiler synthesizes with ry and rz instead.[/dim]\n"
     )
 
     # 2. Transpilation Preflight
@@ -68,13 +67,13 @@ def main():
 
     # 3. Hardware Guard Check
     if is_hardware(args.backend) and not args.armed:
-        console.print("[bold yellow]⚠️  PREFLIGHT ONLY: Hardware safety guard active![/bold yellow]")
+        console.print("[bold yellow]PREFLIGHT ONLY: hardware safety guard active.[/bold yellow]")
         console.print("To submit this job to the physical QPU and spend quota, re-run with:")
         console.print(f"    [bold green]python examples/05_hardware_tuna17_safe.py --backend {args.backend} --armed[/bold green]\n")
         return
 
     # 4. Actual Hardware Execution
-    console.print(f"[bold red]⚡ ARMED: Submitting job to physical hardware {args.backend}...[/bold red]")
+    console.print(f"[bold red]ARMED: Submitting job to physical hardware {args.backend}...[/bold red]")
     execution = execute_circuit(
         circuit_or_circuits=transpiled_qc,
         backend=backend,

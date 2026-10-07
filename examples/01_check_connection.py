@@ -24,14 +24,14 @@ def main():
     # Step 1: Check offline configuration file
     auth_info = check_auth_status()
     if not auth_info["present"]:
-        console.print("[bold red]❌ No credentials file found![/bold red]")
+        console.print("[bold red]No credentials file found.[/bold red]")
         console.print(f"Looked at: {auth_info['path']}")
         console.print("\n[yellow]To log in for the first time:[/yellow]")
         console.print("  Run [bold green]qi login[/bold green] in your terminal.")
         console.print("  This will open a browser window for Quantum Inspire OAuth authentication.\n")
         sys.exit(1)
 
-    console.print(f"✅ Credentials file found at: [green]{auth_info['path']}[/green]")
+    console.print(f"Credentials file found at: [green]{auth_info['path']}[/green]")
     console.print(f"   Default Host: [cyan]{auth_info['host']}[/cyan]")
     if auth_info.get("refresh_expires_at"):
         expired = auth_info.get("is_expired", False)
@@ -44,10 +44,10 @@ def main():
     try:
         provider = get_provider()
     except Exception as exc:
-        console.print(f"[bold red]❌ Failed to connect:[/bold red] {exc}")
+        console.print(f"[bold red]Failed to connect:[/bold red] {exc}")
         sys.exit(1)
 
-    console.print("✅ Successfully authenticated via QIProvider!\n")
+    console.print("Successfully authenticated via QIProvider.\n")
 
     # Step 3: Discover available backends (emulators and QPUs)
     backends = describe_backends(provider)

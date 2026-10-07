@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "quantum-inspire-starter"
 version = "0.1.0"
-description = "A beginner-friendly guide and production-ready Python infrastructure for Quantum Inspire"
+description = "A beginner-friendly guide and Python helpers for running quantum circuits on Quantum Inspire"
 readme = "README.md"
 requires-python = ">=3.10, <3.14"
 authors = [
-    { name = "Quantum Inspire User" }
+    { name = "Neilson Ramalho" }
 ]
 license = "Apache-2.0"
 classifiers = [
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "qiskit>=2.0.0,<2.4.0",
@@ -35,9 +36,6 @@ dev = [
 visuals = [
     "matplotlib>=3.8.0",
 ]
-
-[project.scripts]
-qi-check = "examples.01_check_connection:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["qi_starter"]

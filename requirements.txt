@@ -1,9 +1,5 @@
-# Core Quantum Inspire & Qiskit packages
+# Runtime dependencies
 qiskit>=2.0.0,<2.4.0
 qiskit-quantuminspire>=0.18.2
 quantuminspire>=4.0.0
 rich>=13.0.0
-
-# Optional development and testing dependencies
-pytest>=8.0.0
-matplotlib>=3.8.0

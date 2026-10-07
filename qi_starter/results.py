@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 
 def canonicalize_counts(
@@ -14,7 +14,7 @@ def canonicalize_counts(
     Qiskit and Quantum Inspire return measurement results in little-endian order,
     where qubit 0 is the RIGHTMOST character:
         Key '01' means qubit 1 is '0' and qubit 0 is '1'.
-    Most textbooks and Quanifi's canonical convention use big-endian order,
+    Most textbooks use big-endian order,
     where qubit 0 is the LEFTMOST character:
         Key '10' means qubit 0 is '1' and qubit 1 is '0'.
 
@@ -50,7 +50,7 @@ def wilson_interval(
 ) -> Tuple[float, float]:
     """Calculate the Wilson score confidence interval for a binomial proportion.
 
-    Used to place rigorous confidence bounds on quantum algorithm success probabilities
+    Used to place confidence bounds on quantum algorithm success probabilities
     without relying on the normal approximation (which breaks down near 0 and 1).
 
     Args:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Example 6: Detached submission and job recovery via QPY serialization.
 
-Why this matters (Critical Lesson from Quanifi):
+Why this matters:
   In `qiskit_quantuminspire`, calling `job.job_id()` returns an empty string.
   The provider uses `batch_job_id` under the hood, but the individual circuit
   job IDs needed to fetch results live purely on the in-memory `QIJob` object.
@@ -10,7 +10,7 @@ Why this matters (Critical Lesson from Quanifi):
   you CANNOT retrieve results by batch ID alone through Qiskit's public API.
   The solution is job handle serialization:
     `job.serialize("job_handle.qpy")` -> saves the job handle to disk
-    `QIJob.deserialize(provider, "job_handle.qpy")` -> restores the job handle!
+    `QIJob.deserialize(provider, "job_handle.qpy")` -> restores the job handle
 
 Usage:
     # Option A: Submit and immediately serialize handle to disk (then poll)
@@ -52,14 +52,14 @@ def main():
     args = parser.parse_args()
 
     console = Console()
-    console.print(f"\n[bold cyan]=== Asynchronous Job Serialization & Recovery ===[/bold cyan]\n")
+    console.print("\n[bold cyan]=== Asynchronous Job Serialization & Recovery ===[/bold cyan]\n")
 
     provider = get_provider()
 
     # Mode 1: Poll-only from existing serialized handle
     if args.poll_only:
         if not os.path.exists(args.handle):
-            console.print(f"[bold red]❌ Handle file '{args.handle}' does not exist![/bold red]")
+            console.print(f"[bold red]Handle file '{args.handle}' does not exist.[/bold red]")
             sys.exit(1)
 
         console.print(f"Loading job handle from: [green]{args.handle}[/green]")
@@ -84,17 +84,17 @@ def main():
     batch_id = job.batch_job_id
     console.print(f"Submitted. Provider batch ID: [yellow]{batch_id}[/yellow]")
 
-    # Persist the handle immediately!
+    # Persist the handle immediately
     saved_path = save_job_handle(job, args.handle)
-    console.print(f"💾 [bold green]Serialized job handle to:[/bold green] {saved_path}")
+    console.print(f"[bold green]Serialized job handle to:[/bold green] {saved_path}")
 
     if args.submit_only:
         console.print("\n[yellow]Exiting without waiting (--submit-only was specified).[/yellow]")
-        console.print(f"To poll this job later, run:")
+        console.print("To poll this job later, run:")
         console.print(f"    [bold cyan]python examples/06_async_serialize_poll.py --poll-only --handle {args.handle}[/bold cyan]\n")
         return
 
-    # Simulate waiting in a detached process: reload from disk and poll!
+    # Simulate waiting in a detached process: reload from disk and poll
     console.print("\nSimulating detached process recovery: reloading job from disk...")
     recovered_job = load_job_handle(provider, saved_path)
     console.print(f"Successfully recovered job [yellow]{recovered_job.batch_job_id}[/yellow]")

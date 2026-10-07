@@ -1,5 +1,5 @@
-"""Quantum Inspire Starter: beginner-friendly utilities and production infrastructure
-for executing quantum circuits on Quantum Inspire (emulators and superconducting QPUs).
+"""Quantum Inspire Starter: beginner-friendly utilities for executing quantum circuits on
+Quantum Inspire (emulators and superconducting QPUs).
 """
 
 from qi_starter.auth import check_auth_status, get_provider

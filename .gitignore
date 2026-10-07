@@ -35,10 +35,8 @@ env/
 
 # Quantum Inspire & Job handles
 *.qpy
-*.qijob.qpy
 out/
 runs/
-experiments/out/
 
 # Testing & Coverage
 .pytest_cache/

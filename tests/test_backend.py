@@ -37,7 +37,7 @@ def test_native_basis_gates_filters_rx():
 
     gates = native_basis_gates(MockBackend())
     assert gates is not None
-    # Crucial Quanifi check: 'rx' must be excluded!
+    # 'rx' must be excluded from the basis
     assert "rx" not in gates
     assert "cz" in gates
     assert "ry" in gates

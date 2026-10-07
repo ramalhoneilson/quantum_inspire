@@ -1,9 +1,8 @@
-"""Execution orchestrator, job serialization/recovery, and robust polling loop."""
+"""Execution orchestrator, job serialization/recovery, and a polling loop."""
 
 from __future__ import annotations
 
 import os
-import sys
 import time
 from typing import Any, Dict, List, Optional, Union
 
@@ -21,8 +20,10 @@ def transpile_for_backend(
 ) -> Union[QuantumCircuit, List[QuantumCircuit]]:
     """Transpile circuit(s) ensuring physical hardware gate constraints are respected.
 
-    Uses `native_basis_gates` to avoid unsupported or defect-prone gates
-    (such as Tuna-17's 'rx' gate), forcing Qiskit to synthesize only valid gates.
+    Uses `native_basis_gates` to avoid unsupported gates and `rx` (which we
+    observed behaving as if the angle were negated on Tuna-17; root cause
+    unconfirmed). The exclusion is applied to all backends and costs nothing on
+    emulators, since `ry` and `rz` span all single-qubit rotations.
 
     Args:
         circuits: A single QuantumCircuit or list of circuits.
@@ -55,13 +56,13 @@ def transpile_for_backend(
 def save_job_handle(job: Any, filepath: str) -> str:
     """Serialize a QIJob object to a QPY file on disk.
 
-    Why this matters (from Quanifi):
+    Why this matters:
     QIJob in `qiskit_quantuminspire` assigns empty string to `job.job_id()`;
     the real job identifier is `job.batch_job_id`. Furthermore, the internal
     per-circuit job IDs needed to fetch results live on the in-memory object.
     `job.serialize(filepath)` writes a QPY file holding this state, allowing
     a separate script or post-restart process to resume polling without losing
-    the job!
+    the job.
 
     Args:
         job: An active QIJob instance.
@@ -96,7 +97,7 @@ def load_job_handle(provider: Any, filepath: str) -> Any:
 def extract_counts(result: Any, num_circuits: int) -> List[Dict[str, int]]:
     """Defensively extract measurement counts for each circuit in a result.
 
-    Why this matters (from Quanifi):
+    Why this matters:
     Calling `result.get_counts()` without an index immediately raises an exception
     if even ONE circuit in a multi-circuit batch failed on the backend.
     Iterating with `result.get_counts(i)` isolates failures to individual circuits,

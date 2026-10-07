@@ -41,7 +41,6 @@ def create_ghz_circuit(num_qubits: int = 3) -> QuantumCircuit:
 def create_grover_circuit(marked_state: str = "10") -> QuantumCircuit:
     """Create a 2-qubit, 1-iteration Grover search circuit for a marked state.
 
-    This is the exact Grover algorithm used in Quanifi's hardware evaluation.
     For 2 qubits and 1 marked state, Grover's algorithm has a theoretical success
     probability of exactly 1.0 (100%) on an ideal noiseless simulator.
     Any departure from 100% when run on real hardware (such as Tuna-17)

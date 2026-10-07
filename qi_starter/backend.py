@@ -29,12 +29,12 @@ _QI_GATESET_TO_QISKIT: Dict[str, str] = {
     "reset": "reset",
 }
 
-# Hardware-specific defect filter (Discovered in Quanifi on Tuna-17):
-# Tuna-17 advertises 'rx', but experimental verification demonstrated that it
-# executes with the rotation angle effectively negated.
-# 'ry' and 'rz' are completely sound on Tuna-17 and together span all single-qubit rotations.
-# Excluding 'rx' from the transpiler basis gates forces Qiskit to synthesize using ry/rz,
-# keeping circuits correct on the physical QPU.
+# Precaution for Tuna-17: it advertises 'rx', but we observed circuits transpiled
+# with 'rx' behaving as if the rotation angle were negated. The root cause has not
+# been confirmed. 'ry' and 'rz' together span all single-qubit rotations, so
+# excluding 'rx' from the transpiler basis loses nothing; Qiskit synthesizes with
+# ry/rz instead. The exclusion is applied to every backend (it costs nothing on
+# emulators).
 _QI_UNRELIABLE_GATES: Set[str] = {"rx"}
 
 
@@ -61,8 +61,11 @@ def native_basis_gates(backend: Any) -> Optional[List[str]]:
 
     By default, `qiskit_quantuminspire` advertises a static target basis that
     includes gates not physically implemented by the chip (e.g. CX or SWAP on Tuna-17,
-    which natively implements CZ). Furthermore, physical gates with known hardware
-    calibration issues (such as `rx` on Tuna-17) are filtered out.
+    which natively implements CZ). Furthermore, `rx` is excluded as a precaution
+    (we observed it behaving as if the angle were negated on Tuna-17; the root
+    cause is unconfirmed). The exclusion applies to all backends, including
+    emulators, where it costs nothing because `ry` and `rz` span all single-qubit
+    rotations.
 
     Args:
         backend: A Qiskit Backend object from QIProvider.
@@ -88,7 +91,7 @@ def native_basis_gates(backend: Any) -> Optional[List[str]]:
         for name in gateset
         if name.lower() in _QI_GATESET_TO_QISKIT
     }
-    # Filter out known unreliable hardware gates
+    # Exclude gates we treat as unreliable (currently only 'rx')
     return sorted(mapped - _QI_UNRELIABLE_GATES)
 
 
