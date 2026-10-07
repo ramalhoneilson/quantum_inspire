@@ -339,6 +339,8 @@ quantum_inspire/
 ├── requirements.txt            # Runtime dependencies (pip)
 ├── requirements-dev.txt        # Runtime + test and visualization dependencies
 ├── README.md                   # Beginner guide & documentation
+├── AGENTS.md                   # Guidance for AI coding agents
+├── CLAUDE.md                   # Same guidance, for Claude Code
 ├── LICENSE                     # Apache 2.0 License
 ├── .gitignore                  # Git ignore rules
 │
@@ -360,7 +362,7 @@ quantum_inspire/
 │
 └── tests/                      # Automated unit test suite
     ├── test_circuits.py        # Circuit construction tests
-    ├── test_backend.py         # Batch chunking & basis gate filter tests
+    ├── test_backend.py         # Batch chunking & basis gate mapping tests
     └── test_results.py         # Statistical calculations & formatting tests
 ```
 

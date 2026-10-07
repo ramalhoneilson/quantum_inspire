@@ -1,4 +1,4 @@
-"""Backend discovery, capability extraction, and hardware-specific workarounds."""
+"""Backend discovery, capability extraction, and native basis gate mapping."""
 
 from __future__ import annotations
 
